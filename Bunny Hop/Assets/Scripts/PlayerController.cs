@@ -5,11 +5,14 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody playerRb;
+    private BoxCollider groundBC;
 
     private bool isOnGround;
     private float speed = 10f;
     private float jumpForce = 10f;
     private float gravityModifier = 5f;
+    private float xbound;
+    private float zbound;
 
     public bool isGameOver;
 
@@ -18,7 +21,10 @@ public class PlayerController : MonoBehaviour
     {
         playerRb = GetComponent<Rigidbody>();
         Physics.gravity *= gravityModifier;
+        groundBC = GameObject.Find("Ground").GetComponent<BoxCollider>();
 
+        xbound = groundBC.size.x;
+        zbound = groundBC.size.z;
     }
 
     // Update is called once per frame
@@ -41,6 +47,25 @@ public class PlayerController : MonoBehaviour
         }
 
         // Keep player in bounds
+        if (transform.position.x > xbound)
+        {
+            transform.position = new Vector3(xbound, transform.position.y, transform.position.z);
+        }
+
+        if (transform.position.x < -xbound)
+        {
+            transform.position = new Vector3(-xbound, transform.position.y, transform.position.z);
+        }
+
+        if (transform.position.z > zbound)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, zbound);
+        }
+
+        if (transform.position.z < -zbound)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, -zbound);
+        }
 
     }
 

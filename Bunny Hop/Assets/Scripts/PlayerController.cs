@@ -5,14 +5,11 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody playerRb;
-    private BoxCollider groundBC;
 
     private bool isOnGround;
-    private float speed = 10f;
-    private float jumpForce = 10f;
+    public float speed = 2f;
+    public float jumpForce = 50f;
     private float gravityModifier = 5f;
-    private float xbound;
-    private float zbound;
 
     public bool isGameOver;
 
@@ -21,52 +18,12 @@ public class PlayerController : MonoBehaviour
     {
         playerRb = GetComponent<Rigidbody>();
         Physics.gravity *= gravityModifier;
-        groundBC = GameObject.Find("Ground").GetComponent<BoxCollider>();
-
-        xbound = groundBC.size.x;
-        zbound = groundBC.size.z;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Get the player inputs
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-
-        // Move the player left / right
-        playerRb.AddForce(Vector3.forward * speed * verticalInput);
-        playerRb.AddForce(Vector3.right * speed * horizontalInput);
-
-        // Jump the player
-        if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
-        {
-            playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isOnGround = false;
-        }
-
-        // Keep player in bounds
-        if (transform.position.x > xbound)
-        {
-            transform.position = new Vector3(xbound, transform.position.y, transform.position.z);
-        }
-
-        if (transform.position.x < -xbound)
-        {
-            transform.position = new Vector3(-xbound, transform.position.y, transform.position.z);
-        }
-
-        if (transform.position.z > zbound)
-        {
-            transform.position = new Vector3(transform.position.x, transform.position.y, zbound);
-        }
-
-        if (transform.position.z < -zbound)
-        {
-            transform.position = new Vector3(transform.position.x, transform.position.y, -zbound);
-        }
-
+        MovePlayer();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -77,8 +34,36 @@ public class PlayerController : MonoBehaviour
             isOnGround = true;
         }
 
-        // Handle colliding with food
-
         // Handle colliding with enemy
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Food"))
+        {
+            Destroy(other.gameObject);
+            Debug.Log("Player got the food");
+        }
+    }
+
+    // Move the player left or right, or jump based on keyboard input
+    private void MovePlayer()
+    {
+        // Get the player inputs
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+
+        // Move the player left / right
+        playerRb.AddForce(Vector3.forward * speed * verticalInput * Time.deltaTime, ForceMode.Impulse);
+        playerRb.AddForce(Vector3.right * speed * horizontalInput * Time.deltaTime, ForceMode.Impulse);
+
+        // Jump the player
+        if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
+        {
+            playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isOnGround = false;
+        }
+    }
+
 }
